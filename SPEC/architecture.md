@@ -7,7 +7,7 @@ The project is a monorepo containing two independent applications:
 - `frontend` — Next.js application (runs on `http://localhost:3000`)
 - `backend` — Express.js REST API (runs on `http://localhost:5000`)
 
-MySQL runs inside a Docker container (exposed on `localhost:3306`).
+MySQL runs inside a Docker container (exposed on `localhost:3307` — port 3307 avoids clashing with a MySQL server already installed on the host).
 
 The frontend and backend have separate `package.json` files and are
 installed, run, and tested independently. They share no code; the API
@@ -37,7 +37,7 @@ contract in [api.md](api.md) is the boundary between them.
                             |
                             v
                  +----------------------+
-                 |        MySQL         |   :3306
+                 |        MySQL         |   :3307
                  |   Docker Container   |
                  +----------------------+
 ```
@@ -66,15 +66,17 @@ contract in [api.md](api.md) is the boundary between them.
 backend/
 ├── prisma/
 │   ├── schema.prisma
-│   ├── seed.ts                  # seeds predefined categories
+│   ├── categories.ts            # category list + seedCategories()
+│   ├── seed.ts                  # runs seedCategories() (npm run db:seed)
 │   └── migrations/
 ├── src/
+│   ├── generated/prisma/        # generated Prisma client (git-ignored)
 │   ├── server.ts                # starts HTTP server
 │   ├── app.ts                   # builds Express app (used by server and tests)
 │   ├── config/
 │   │   └── env.ts               # loads + validates env vars with Zod
 │   ├── lib/
-│   │   └── prisma.ts            # single PrismaClient instance
+│   │   └── prisma.ts            # single PrismaClient instance (MariaDB adapter)
 │   ├── middleware/
 │   │   ├── requireAuth.ts       # verifies JWT cookie, sets req.userId
 │   │   ├── validate.ts          # validates body/query/params with a Zod schema
@@ -96,10 +98,15 @@ backend/
 │   └── types/
 │       └── express.d.ts         # adds userId to Request
 ├── tests/
+│   ├── testEnv.ts               # env for the test run (test database URL)
+│   ├── globalSetup.ts           # applies migrations to the test database
+│   ├── helpers.ts               # resetDatabase()
 │   ├── auth.test.ts
 │   ├── transactions.test.ts
 │   └── dashboard.test.ts
 ├── .env.example
+├── prisma.config.ts             # Prisma 7 config: schema, migrations, seed, DB URL
+├── vitest.config.ts
 ├── package.json
 └── tsconfig.json
 ```
@@ -294,7 +301,7 @@ MYSQL_ROOT_PASSWORD=rootpassword
 MYSQL_DATABASE=finance_tracker
 MYSQL_USER=finance_user
 MYSQL_PASSWORD=finance_password
-MYSQL_PORT=3306
+MYSQL_PORT=3307
 ```
 
 ### `backend/.env.example`
@@ -302,7 +309,7 @@ MYSQL_PORT=3306
 ```text
 NODE_ENV=development
 PORT=5000
-DATABASE_URL=mysql://root:rootpassword@localhost:3306/finance_tracker
+DATABASE_URL=mysql://root:rootpassword@localhost:3307/finance_tracker
 JWT_SECRET=change-me-to-a-long-random-string-at-least-32-chars
 JWT_EXPIRES_IN=1d
 CORS_ORIGIN=http://localhost:3000
@@ -336,7 +343,7 @@ services:
     restart: unless-stopped
     env_file: .env
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "${MYSQL_PORT:-3307}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -384,7 +391,7 @@ npm run dev                   # http://localhost:3000
 | backend | `build` / `start` | Compile to `dist/` and run |
 | backend | `test` | Run Vitest + Supertest |
 | backend | `lint` / `format` | ESLint / Prettier |
-| backend | `db:migrate` / `db:seed` / `db:studio` | Prisma helpers |
+| backend | `db:migrate` / `db:deploy` / `db:seed` / `db:reset` / `db:studio` | Prisma helpers |
 | frontend | `dev` / `build` / `start` | Next.js |
 | frontend | `lint` / `format` | ESLint / Prettier |
 
@@ -399,5 +406,7 @@ npm run dev                   # http://localhost:3000
 | Frontend | Optional for MVP | Manual testing against the running API |
 
 Backend tests use a separate database, `finance_tracker_test`, in the same
-MySQL container. Tables are cleared between test files and categories are
-re-seeded.
+MySQL container (override with `TEST_DATABASE_URL`). Before the run,
+`tests/globalSetup.ts` creates it if needed and applies migrations. Each test
+file calls `resetDatabase()` to clear tables and re-seed categories, and test
+files run one at a time because they share the database.

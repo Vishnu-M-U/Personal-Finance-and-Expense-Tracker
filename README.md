@@ -26,6 +26,8 @@ docker compose ps            # wait until mysql shows "healthy"
 cd backend
 cp .env.example .env
 npm install
+npm run db:migrate           # create tables
+npm run db:seed              # insert predefined categories
 npm run dev
 
 # 3. Frontend → http://localhost:3000  (in a second terminal)
@@ -43,11 +45,18 @@ Check the API is up: `curl http://localhost:5000/api/health`
 |----------|---------|---------|
 | backend | `npm run dev` | API with hot reload |
 | backend | `npm run build` / `npm start` | Compile to `dist/` and run |
-| backend | `npm test` | Run tests |
+| backend | `npm test` | Run tests (uses the `finance_tracker_test` database; MySQL must be running) |
+| backend | `npm run db:migrate` | Create/apply migrations in development |
+| backend | `npm run db:seed` | Insert predefined categories (safe to re-run) |
+| backend | `npm run db:reset` | Drop and recreate the dev database, then seed |
+| backend | `npm run db:studio` | Browse data in Prisma Studio |
 | backend / frontend | `npm run lint` | ESLint |
 | backend / frontend | `npm run typecheck` | TypeScript check |
 | backend / frontend | `npm run format` | Prettier |
 | frontend | `npm run dev` / `npm run build` | Next.js |
+
+MySQL is published on **localhost:3307** (not 3306) so it doesn't clash with a MySQL
+server installed directly on your machine.
 
 ## Stopping MySQL
 
@@ -61,7 +70,7 @@ docker compose down -v    # stop and delete all data
 Built in phases (see [SPEC/spec.md §8](SPEC/spec.md)).
 
 - [x] Phase 0 — Repo setup
-- [ ] Phase 1 — Database schema and seed
+- [x] Phase 1 — Database schema and seed
 - [ ] Phase 2 — Backend auth
 - [ ] Phase 3 — Categories and transactions API
 - [ ] Phase 4 — Dashboard API

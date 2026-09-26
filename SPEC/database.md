@@ -13,9 +13,10 @@ installed directly on the developer's machine.
 Database Engine: MySQL 8.4
 Database Name:   finance_tracker
 Test Database:   finance_tracker_test
-ORM:             Prisma
-Charset:         utf8mb4 (MySQL 8 default)
-Collation:       utf8mb4_0900_ai_ci (case-insensitive, MySQL 8 default)
+ORM:             Prisma 7 (MariaDB driver adapter)
+Host port:       3307 (container port 3306)
+Charset:         utf8mb4
+Collation:       utf8mb4_unicode_ci (case-insensitive; set by Prisma migrations)
 ```
 
 ---
@@ -99,12 +100,12 @@ Unique constraint on (`name`, `type`).
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 enum TransactionType {
@@ -156,9 +157,20 @@ model Transaction {
 }
 ```
 
-> The generator and datasource blocks may need small changes depending on
-> the Prisma major version installed at scaffold time (newer versions move
-> the connection URL into `prisma.config.ts`). The models stay the same.
+### Prisma 7 setup notes
+
+- The connection URL lives in `backend/prisma.config.ts` (read from
+  `DATABASE_URL`), not in the schema. The config also sets the migrations
+  folder and the seed command.
+- The client is generated as TypeScript into `backend/src/generated/prisma/`
+  (git-ignored, regenerated on `npm install`) and imported from
+  `src/generated/prisma/client.js`.
+- Prisma 7 connects through a driver adapter. MySQL uses
+  `@prisma/adapter-mariadb`; the single client instance is created in
+  `src/lib/prisma.ts`. The adapter accepts the `mysql://` URL as-is.
+- `backend/package.json` overrides the adapter's `mariadb` driver to 3.5.4,
+  because the pinned 3.4.5 has published security advisories. Remove the
+  override once a Prisma release ships a patched driver.
 
 **Naming convention:** Prisma models and fields use `camelCase` in code;
 tables and columns use `snake_case` in MySQL via `@map` / `@@map`.
@@ -167,8 +179,10 @@ tables and columns use `snake_case` in MySQL via `@map` / `@@map`.
 
 ## 5. Seed Data
 
-`backend/prisma/seed.ts` inserts the predefined categories using
-`upsert` on (`name`, `type`), so running the seed multiple times is safe.
+The category list and a `seedCategories()` function live in
+`backend/prisma/categories.ts`; `backend/prisma/seed.ts` runs it (also reused
+by the tests). It uses `upsert` on (`name`, `type`), so running the seed
+multiple times is safe.
 
 | type | name |
 |------|------|

@@ -1,12 +1,13 @@
 import { defineConfig } from "vitest/config";
+import { testEnv } from "./tests/testEnv.js";
 
 export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
-    env: {
-      NODE_ENV: "test",
-      CORS_ORIGIN: "http://localhost:3000",
-    },
+    globalSetup: ["tests/globalSetup.ts"],
+    // Test files share one database, so run them one at a time.
+    fileParallelism: false,
+    env: testEnv,
   },
 });
