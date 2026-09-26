@@ -68,6 +68,7 @@ backend/
 │   ├── schema.prisma
 │   ├── categories.ts            # category list + seedCategories()
 │   ├── seed.ts                  # runs seedCategories() (npm run db:seed)
+│   ├── seed-demo.ts             # demo user + sample data (npm run db:seed:demo)
 │   └── migrations/
 ├── src/
 │   ├── generated/prisma/        # generated Prisma client (git-ignored)
@@ -403,7 +404,7 @@ npm run dev                   # http://localhost:3000
 | backend | `build` / `start` | Compile to `dist/` and run |
 | backend | `test` | Run Vitest + Supertest |
 | backend | `lint` / `format` | ESLint / Prettier |
-| backend | `db:migrate` / `db:deploy` / `db:seed` / `db:reset` / `db:studio` | Prisma helpers |
+| backend | `db:migrate` / `db:deploy` / `db:seed` / `db:seed:demo` / `db:reset` / `db:studio` | Prisma helpers |
 | frontend | `dev` / `build` / `start` | Next.js |
 | frontend | `lint` / `format` | ESLint / Prettier |
 
