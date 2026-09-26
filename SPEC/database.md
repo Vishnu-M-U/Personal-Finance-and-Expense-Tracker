@@ -92,6 +92,24 @@ Unique constraint on (`name`, `type`).
 | `idx_txn_user_category` | (`user_id`, `category_id`) | Category filter, category breakdown |
 | `idx_txn_user_type` | (`user_id`, `type`) | Type filter |
 
+### 3.4 `investments`
+
+A holding the user tracks. The current value is entered and updated by the user; there is no
+market-data feed.
+
+| Column | Type | Null | Default | Notes |
+|--------|------|------|---------|-------|
+| `id` | INT, auto-increment | No | — | Primary key |
+| `user_id` | INT | No | — | FK → `users.id`, `ON DELETE CASCADE` |
+| `name` | VARCHAR(100) | No | — | e.g. "Nippon Small Cap" |
+| `type` | ENUM('MUTUAL_FUND','STOCKS','GOLD','FIXED_DEPOSIT','BONDS','REAL_ESTATE','CRYPTO','OTHER') | No | — | |
+| `invested_amount` | DECIMAL(12,2) | No | — | Always > 0 |
+| `current_value` | DECIMAL(12,2) | No | — | ≥ 0 (0 = lost everything) |
+| `created_at` | DATETIME(3) | No | `now()` | |
+| `updated_at` | DATETIME(3) | No | auto | Shown as "Updated …" in the UI |
+
+**Indexes:** `idx_inv_user` (`user_id`) — the list query. Returns are calculated on read, not stored.
+
 ---
 
 ## 4. Prisma Schema
@@ -247,7 +265,7 @@ before reaching it):
 
 | Command | When |
 |---------|------|
-| `npx prisma migrate dev --name <name>` | During development, after changing `schema.prisma` |
+| `npx prisma migrate dev --name <name>` | During development, after changing `schema.prisma`. Prisma 7 doesn't regenerate the client here, so run `npx prisma generate` afterwards |
 | `npx prisma migrate deploy` | In test/production environments |
 | `npx prisma migrate reset` | Wipe and recreate the dev database (runs seed) |
 | `npx prisma db seed` | Insert/refresh categories |

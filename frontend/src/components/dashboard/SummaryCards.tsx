@@ -1,38 +1,44 @@
-import { Card } from "@/components/ui/Card";
-import { formatCurrency } from "@/lib/format";
+import { balanceTone, StatTile } from "@/components/ui/StatTile";
+import { formatBalance, formatCurrency } from "@/lib/format";
 import type { DashboardSummary } from "@/types/api";
 
-function StatTile({ label, value, note }: { label: string; value: string; note?: string }) {
-  return (
-    <Card className="p-5">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-        {value}
-      </p>
-      {note && <p className="mt-1 text-sm text-slate-500">{note}</p>}
-    </Card>
-  );
-}
-
 export function SummaryCards({ totals }: { totals: DashboardSummary["totals"] }) {
+  const income = Number(totals.income);
   const balance = Number(totals.balance);
-  const balanceText =
-    balance < 0 ? `−${formatCurrency(totals.balance.slice(1))}` : formatCurrency(totals.balance);
+  // Share of income kept, for display only.
+  const savedPct = income > 0 && balance > 0 ? Math.round((balance / income) * 100) : null;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <StatTile label="Total income" value={formatCurrency(totals.income)} />
-      <StatTile label="Total expenses" value={formatCurrency(totals.expense)} />
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <StatTile
         label="Net balance"
-        value={balanceText}
+        value={formatBalance(totals.balance)}
+        tile="balance"
+        icon="wallet"
+        size="lg"
+        valueTone={balanceTone(totals.balance)}
         note={
           balance < 0
             ? "You spent more than you earned"
-            : balance > 0
-              ? "Income minus expenses"
-              : undefined
+            : savedPct !== null
+              ? `${savedPct}% of income saved`
+              : "Income minus expenses"
         }
+        className="sm:col-span-2 lg:col-span-1"
+      />
+      <StatTile
+        label="Total income"
+        value={formatCurrency(totals.income)}
+        tile="income"
+        icon="up"
+        note="Money in"
+      />
+      <StatTile
+        label="Total expenses"
+        value={formatCurrency(totals.expense)}
+        tile="expense"
+        icon="down"
+        note="Money out"
       />
     </div>
   );

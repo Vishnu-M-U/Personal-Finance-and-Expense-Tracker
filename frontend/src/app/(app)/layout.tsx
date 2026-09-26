@@ -39,7 +39,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <Navbar user={user} />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">{children}</main>
+      <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        {children}
+      </main>
     </>
   );
 }

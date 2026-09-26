@@ -55,3 +55,37 @@ export interface ApiErrorBody {
     details?: { field: string; message: string }[];
   };
 }
+
+export type InvestmentType =
+  | "MUTUAL_FUND"
+  | "STOCKS"
+  | "GOLD"
+  | "FIXED_DEPOSIT"
+  | "BONDS"
+  | "REAL_ESTATE"
+  | "CRYPTO"
+  | "OTHER";
+
+export interface Investment {
+  id: number;
+  name: string;
+  type: InvestmentType;
+  /** Decimal strings with 2 places */
+  investedAmount: string;
+  currentValue: string;
+  /** currentValue − investedAmount; negative for a loss */
+  returnAmount: string;
+  /** returnAmount as a % of investedAmount, 2 decimals */
+  returnPercentage: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvestmentSummary {
+  totalInvested: string;
+  currentValue: string;
+  totalReturn: string;
+  returnPercentage: number;
+  /** Share of current value per type, largest first */
+  allocation: { type: InvestmentType; currentValue: string; percentage: number }[];
+}

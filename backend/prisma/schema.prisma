@@ -12,6 +12,17 @@ enum TransactionType {
   EXPENSE
 }
 
+enum InvestmentType {
+  MUTUAL_FUND
+  STOCKS
+  GOLD
+  FIXED_DEPOSIT
+  BONDS
+  REAL_ESTATE
+  CRYPTO
+  OTHER
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   name         String        @db.VarChar(100)
@@ -20,6 +31,7 @@ model User {
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
   transactions Transaction[]
+  investments  Investment[]
 
   @@map("users")
 }
@@ -53,4 +65,21 @@ model Transaction {
   @@index([userId, categoryId], map: "idx_txn_user_category")
   @@index([userId, type], map: "idx_txn_user_type")
   @@map("transactions")
+}
+
+/// A holding the user tracks. The current value is entered by the user; there is no market feed.
+model Investment {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @map("user_id")
+  name           String         @db.VarChar(100)
+  type           InvestmentType
+  investedAmount Decimal        @map("invested_amount") @db.Decimal(12, 2)
+  currentValue   Decimal        @map("current_value") @db.Decimal(12, 2)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_inv_user")
+  @@map("investments")
 }

@@ -21,12 +21,12 @@ export default function LoginPage() {
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
 
   return (
-    <Card className="p-6 sm:p-8">
-      <h2 className="text-lg font-semibold text-slate-900">Log in</h2>
-      <p className="mt-1 text-sm text-slate-500">Welcome back. Enter your details to continue.</p>
+    <Card className="p-6 sm:p-10">
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Log in</h2>
+      <p className="mt-2 text-sm text-slate-500">Welcome back. Enter your details to continue.</p>
 
       <form
-        className="mt-6 space-y-4"
+        className="mt-8 space-y-5"
         noValidate
         onSubmit={handleSubmit((values) => login.mutate(values))}
       >
@@ -34,6 +34,7 @@ export default function LoginPage() {
 
         <Field label="Email" htmlFor="email" error={errors.email?.message}>
           <Input
+            className="h-11"
             id="email"
             type="email"
             autoComplete="email"
@@ -44,6 +45,7 @@ export default function LoginPage() {
 
         <Field label="Password" htmlFor="password" error={errors.password?.message}>
           <Input
+            className="h-11"
             id="password"
             type="password"
             autoComplete="current-password"
@@ -52,14 +54,14 @@ export default function LoginPage() {
           />
         </Field>
 
-        <Button type="submit" className="w-full" loading={login.isPending}>
+        <Button type="submit" className="h-11 w-full" loading={login.isPending}>
           Log in
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+        <Link href="/register" className="font-medium text-brand-600 hover:text-brand-500">
           Sign up
         </Link>
       </p>

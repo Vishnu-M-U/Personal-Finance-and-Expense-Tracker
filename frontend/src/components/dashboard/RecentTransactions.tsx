@@ -1,36 +1,54 @@
 import Link from "next/link";
 import { Amount } from "@/components/transactions/Amount";
-import { Card } from "@/components/ui/Card";
+import { CategoryIcon } from "@/components/transactions/CategoryIcon";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import type { Transaction } from "@/types/api";
 
 export function RecentTransactions({ transactions }: { transactions: Transaction[] }) {
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">Recent transactions</h2>
-        <Link
-          href="/transactions"
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          View all
-        </Link>
-      </div>
+    <Card className="p-5 sm:p-6">
+      <CardHeader
+        title="Recent transactions"
+        subtitle="Latest activity in this period"
+        action={
+          <Link
+            href="/transactions"
+            className="rounded-md text-sm font-medium text-brand-600 hover:text-brand-700"
+          >
+            View all
+          </Link>
+        }
+      />
       {transactions.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">No transactions in this period.</p>
+        <p className="py-10 text-center text-sm text-slate-500">No transactions in this period.</p>
       ) : (
-        <ul className="mt-2 divide-y divide-slate-100">
+        <ul className="-mx-2 mt-4 divide-y divide-slate-100">
           {transactions.map((t) => (
-            <li key={t.id} className="flex items-center justify-between gap-3 py-3">
-              <div className="min-w-0">
+            <li
+              key={t.id}
+              className="flex items-start gap-3 rounded-lg px-2 py-3 hover:bg-slate-100"
+            >
+              <span
+                className={cn(
+                  "flex size-10 shrink-0 items-center justify-center rounded-full",
+                  t.type === "INCOME"
+                    ? "bg-income-100 text-income-600"
+                    : "bg-expense-100 text-expense-600",
+                )}
+                aria-hidden="true"
+              >
+                <CategoryIcon name={t.category.name} />
+              </span>
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-slate-900">
                   {t.description ?? t.category.name}
                 </p>
-                <p className="text-sm text-slate-500">
-                  {formatDate(t.date)} · {t.category.name}
-                </p>
+                <p className="mt-0.5 truncate text-xs text-slate-600">{t.category.name}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{formatDate(t.date)}</p>
               </div>
-              <Amount amount={t.amount} type={t.type} className="shrink-0 text-sm" />
+              <Amount amount={t.amount} type={t.type} className="shrink-0 text-sm font-semibold" />
             </li>
           ))}
         </ul>

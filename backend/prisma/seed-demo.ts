@@ -1,13 +1,13 @@
 /**
- * Creates a demo user with ~3 months of sample transactions ending today.
- * Re-running resets the demo user's transactions. Development only.
+ * Creates a demo user with ~3 months of sample transactions ending today, plus a few investments.
+ * Re-running resets the demo user's transactions and investments. Development only.
  *
  *   npm run db:seed:demo   →   demo@example.com / password123
  */
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "../src/generated/prisma/client.js";
+import { PrismaClient, type InvestmentType } from "../src/generated/prisma/client.js";
 import { seedCategories } from "./categories.js";
 
 const DEMO_EMAIL = "demo@example.com";
@@ -58,6 +58,14 @@ const ONE_OFF: [number, string, string, number, string | null][] = [
   [2, "Healthcare", "850.00", 9, "Pharmacy"],
 ];
 
+// [name, type, invested, current value]
+const INVESTMENTS: [string, InvestmentType, string, string][] = [
+  ["Nippon Small Cap", "MUTUAL_FUND", "50000.00", "58000.00"],
+  ["Parag Parikh Flexicap", "MUTUAL_FUND", "60000.00", "69000.00"],
+  ["Gold ETF", "GOLD", "40000.00", "45500.00"],
+  ["Infosys", "STOCKS", "25000.00", "23150.00"],
+];
+
 try {
   await seedCategories(prisma);
   const categories = new Map((await prisma.category.findMany()).map((c) => [c.name, c] as const));
@@ -104,7 +112,21 @@ try {
     }),
   });
 
-  console.log(`Demo user ready: ${DEMO_EMAIL} / ${DEMO_PASSWORD} (${rows.length} transactions)`);
+  await prisma.investment.deleteMany({ where: { userId: user.id } });
+  await prisma.investment.createMany({
+    data: INVESTMENTS.map(([name, type, investedAmount, currentValue]) => ({
+      userId: user.id,
+      name,
+      type,
+      investedAmount,
+      currentValue,
+    })),
+  });
+
+  console.log(
+    `Demo user ready: ${DEMO_EMAIL} / ${DEMO_PASSWORD} ` +
+      `(${rows.length} transactions, ${INVESTMENTS.length} investments)`,
+  );
 } finally {
   await prisma.$disconnect();
 }

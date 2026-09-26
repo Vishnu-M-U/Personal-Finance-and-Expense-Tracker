@@ -20,6 +20,9 @@ Specs live in [SPEC/](SPEC/): [product](SPEC/spec.md), [architecture](SPEC/archi
 - Transactions: add, edit, delete (with confirmation)
 - Filter by type, category, date range and description search; sort by date or amount;
   pagination; filters are kept in the URL
+- Investments: track holdings (mutual funds, stocks, gold, FDs and more) with the amount
+  invested and a current value you update; see total returns, allocation by type and each
+  holding's gain or loss
 - 18 predefined income and expense categories
 - Works on desktop and mobile
 
@@ -88,7 +91,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 | backend | `npm test` | Integration tests (uses the `finance_tracker_test` database; MySQL must be running) |
 | backend | `npm run db:migrate` | Create/apply migrations in development |
 | backend | `npm run db:seed` | Insert predefined categories (safe to re-run) |
-| backend | `npm run db:seed:demo` | Create/reset the demo user and sample transactions |
+| backend | `npm run db:seed:demo` | Create/reset the demo user with sample transactions and investments |
 | backend | `npm run db:reset` | Drop and recreate the dev database, then seed categories |
 | backend | `npm run db:studio` | Browse data in Prisma Studio |
 | frontend | `npm run dev` / `npm run build` / `npm start` | Next.js |
@@ -98,7 +101,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
 ```text
 ├── SPEC/            product, architecture, database and API specs
-├── backend/         Express API — src/modules/{auth,categories,transactions,dashboard}
+├── backend/         Express API — src/modules/{auth,categories,transactions,dashboard,investments}
 │   ├── prisma/      schema, migrations, seeds
 │   └── tests/       Vitest + Supertest integration tests
 ├── frontend/        Next.js app — src/app/(auth), src/app/(app), components, hooks

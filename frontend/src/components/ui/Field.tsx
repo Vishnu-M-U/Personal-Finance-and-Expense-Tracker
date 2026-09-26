@@ -17,7 +17,7 @@ export function Field({ label, htmlFor, error, hint, children }: FieldProps) {
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-sm text-rose-600">
+        <p id={`${htmlFor}-error`} className="text-sm text-expense-600">
           {error}
         </p>
       ) : (

@@ -8,6 +8,7 @@ export const queryKeys = {
     all: ["transactions"] as const,
     list: (filters: TransactionFilters) => ["transactions", filters] as const,
   },
+  investments: ["investments"] as const,
   dashboard: {
     all: ["dashboard"] as const,
     summary: (startDate: string, endDate: string) => ["dashboard", { startDate, endDate }] as const,

@@ -123,11 +123,11 @@ function TransactionForm({
             <label
               key={option}
               className={cn(
-                "cursor-pointer rounded-md px-3 py-1.5 text-center text-sm font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-600",
+                "cursor-pointer rounded-md px-3 py-1.5 text-center text-sm font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600",
                 type === option
                   ? option === "INCOME"
-                    ? "bg-white text-emerald-700 shadow-sm"
-                    : "bg-white text-rose-700 shadow-sm"
+                    ? "bg-white text-income-700 shadow-sm"
+                    : "bg-white text-expense-700 shadow-sm"
                   : "text-slate-600 hover:text-slate-900",
               )}
             >

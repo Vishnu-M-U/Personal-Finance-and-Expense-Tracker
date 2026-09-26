@@ -43,19 +43,26 @@ export default function RegisterPage() {
     getErrorCode(registerUser.error) !== "VALIDATION_ERROR";
 
   return (
-    <Card className="p-6 sm:p-8">
-      <h2 className="text-lg font-semibold text-slate-900">Create an account</h2>
-      <p className="mt-1 text-sm text-slate-500">Start tracking your income and expenses.</p>
+    <Card className="p-6 sm:p-10">
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Create an account</h2>
+      <p className="mt-2 text-sm text-slate-500">Start tracking your income and expenses.</p>
 
-      <form className="mt-6 space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
+      <form className="mt-8 space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         {showBanner && <Alert>{getErrorMessage(registerUser.error)}</Alert>}
 
         <Field label="Name" htmlFor="name" error={errors.name?.message}>
-          <Input id="name" autoComplete="name" aria-invalid={!!errors.name} {...register("name")} />
+          <Input
+            className="h-11"
+            id="name"
+            autoComplete="name"
+            aria-invalid={!!errors.name}
+            {...register("name")}
+          />
         </Field>
 
         <Field label="Email" htmlFor="email" error={errors.email?.message}>
           <Input
+            className="h-11"
             id="email"
             type="email"
             autoComplete="email"
@@ -71,6 +78,7 @@ export default function RegisterPage() {
           hint="At least 8 characters."
         >
           <Input
+            className="h-11"
             id="password"
             type="password"
             autoComplete="new-password"
@@ -79,14 +87,14 @@ export default function RegisterPage() {
           />
         </Field>
 
-        <Button type="submit" className="w-full" loading={registerUser.isPending}>
+        <Button type="submit" className="h-11 w-full" loading={registerUser.isPending}>
           Create account
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+        <Link href="/login" className="font-medium text-brand-600 hover:text-brand-500">
           Log in
         </Link>
       </p>

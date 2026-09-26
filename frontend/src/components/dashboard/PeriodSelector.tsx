@@ -11,6 +11,7 @@ interface Props {
   onCustomRangeChange: (range: DateRange) => void;
 }
 
+/** Period buttons styled for the indigo dashboard hero. */
 export function PeriodSelector({
   preset,
   customRange,
@@ -18,11 +19,11 @@ export function PeriodSelector({
   onCustomRangeChange,
 }: Props) {
   return (
-    <div className="flex flex-col gap-3 sm:items-end">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <div
         role="radiogroup"
         aria-label="Period"
-        className="flex flex-wrap gap-1 rounded-lg bg-white p-1 shadow-sm ring-1 ring-slate-200"
+        className="flex flex-wrap gap-1 self-start rounded-lg bg-white/10 p-1 ring-1 ring-inset ring-white/20"
       >
         {(Object.keys(PERIOD_LABELS) as PeriodPreset[]).map((key) => (
           <button
@@ -32,10 +33,10 @@ export function PeriodSelector({
             aria-checked={preset === key}
             onClick={() => onPresetChange(key)}
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-white",
               preset === key
-                ? "bg-indigo-600 text-white"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                ? "bg-white text-brand-700 shadow-sm"
+                : "text-brand-100 hover:bg-white/10 hover:text-white",
             )}
           >
             {PERIOD_LABELS[key]}
@@ -44,30 +45,32 @@ export function PeriodSelector({
       </div>
 
       {preset === "custom" && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="period-start" className="sr-only">
             Start date
           </label>
-          <Input
-            id="period-start"
-            type="date"
-            className="w-auto"
-            value={customRange.startDate}
-            max={customRange.endDate || undefined}
-            onChange={(e) => onCustomRangeChange({ ...customRange, startDate: e.target.value })}
-          />
-          <span className="text-sm text-slate-500">to</span>
+          <div className="w-44">
+            <Input
+              id="period-start"
+              type="date"
+              value={customRange.startDate}
+              max={customRange.endDate || undefined}
+              onChange={(e) => onCustomRangeChange({ ...customRange, startDate: e.target.value })}
+            />
+          </div>
+          <span className="text-sm text-brand-100">to</span>
           <label htmlFor="period-end" className="sr-only">
             End date
           </label>
-          <Input
-            id="period-end"
-            type="date"
-            className="w-auto"
-            value={customRange.endDate}
-            min={customRange.startDate || undefined}
-            onChange={(e) => onCustomRangeChange({ ...customRange, endDate: e.target.value })}
-          />
+          <div className="w-44">
+            <Input
+              id="period-end"
+              type="date"
+              value={customRange.endDate}
+              min={customRange.startDate || undefined}
+              onChange={(e) => onCustomRangeChange({ ...customRange, endDate: e.target.value })}
+            />
+          </div>
         </div>
       )}
     </div>

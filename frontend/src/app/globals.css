@@ -5,6 +5,48 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * Design system. Use these names instead of raw Tailwind hues:
+ *   brand   — indigo: navigation, buttons, links, active controls, focus
+ *   income  — green: income and positive values only
+ *   expense — red: expenses, negative values and destructive actions only
+ *   violet  — accent for the dashboard hero gradient only
+ * Neutrals are Tailwind's slate, pinned to the design system's exact values.
+ */
+@theme {
+  --color-canvas: #f6f7fb; /* page background */
+
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5; /* primary */
+  --color-brand-700: #4338ca; /* primary hover */
+  --color-brand-800: #3730a3; /* dark indigo */
+  --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b; /* deep end of the sign-in panel gradient */
+
+  --color-income-50: #f0fdf4;
+  --color-income-100: #dcfce7; /* income background */
+  --color-income-200: #bbf7d0;
+  --color-income-600: #16a34a; /* income */
+  --color-income-700: #15803d; /* income text on the light background */
+
+  --color-expense-50: #fef2f2;
+  --color-expense-100: #fee2e2; /* expense background */
+  --color-expense-200: #fecaca;
+  --color-expense-600: #dc2626; /* expense */
+  --color-expense-700: #b91c1c; /* expense text on the light background */
+
+  --color-violet-600: #7c3aed;
+
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9; /* hover background */
+  --color-slate-200: #e2e8f0; /* border */
+  --color-slate-500: #64748b; /* secondary text */
+  --color-slate-900: #0f172a; /* primary text */
+}
+
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }

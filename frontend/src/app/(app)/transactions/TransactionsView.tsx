@@ -5,12 +5,16 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Spinner } from "@/components/ui/Spinner";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { DeleteTransactionDialog } from "@/components/transactions/DeleteTransactionDialog";
 import { Pagination } from "@/components/transactions/Pagination";
 import { TransactionFiltersBar } from "@/components/transactions/TransactionFilters";
 import { TransactionFormModal } from "@/components/transactions/TransactionFormModal";
-import { TransactionTable } from "@/components/transactions/TransactionTable";
+import {
+  TransactionTable,
+  TransactionTableSkeleton,
+} from "@/components/transactions/TransactionTable";
 import { useCategories } from "@/hooks/useCategories";
 import { useTransactions } from "@/hooks/useTransactions";
 import { getErrorMessage } from "@/lib/api";
@@ -80,12 +84,18 @@ export function TransactionsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-slate-900">Transactions</h1>
-        <Button onClick={() => setForm({ open: true, transaction: null })}>
-          <span aria-hidden="true">+</span> Add transaction
-        </Button>
-      </div>
+      <PageHeader
+        title="Transactions"
+        description="Track and manage your financial activity"
+        action={
+          <Button onClick={() => setForm({ open: true, transaction: null })}>
+            <span aria-hidden="true" className="text-base leading-none">
+              +
+            </span>
+            Add transaction
+          </Button>
+        }
+      />
 
       <Card className="p-4">
         <TransactionFiltersBar
@@ -98,9 +108,7 @@ export function TransactionsView() {
 
       <Card className="overflow-hidden">
         {transactions.isPending ? (
-          <div className="flex justify-center py-16 text-indigo-600">
-            <Spinner />
-          </div>
+          <TransactionTableSkeleton />
         ) : transactions.isError ? (
           <div className="p-4">
             <Alert
@@ -114,11 +122,29 @@ export function TransactionsView() {
             </Alert>
           </div>
         ) : rows.length === 0 ? (
-          <EmptyState
-            filtered={hasActiveFilters(filters)}
-            onAdd={() => setForm({ open: true, transaction: null })}
-            onClear={clearFilters}
-          />
+          hasActiveFilters(filters) ? (
+            <EmptyState
+              icon="search"
+              title="No transactions match your filters"
+              description="Try a different search, type, category or date range."
+              action={
+                <Button variant="secondary" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon="receipt"
+              title="No transactions yet"
+              description="Add your first income or expense to start tracking where your money goes."
+              action={
+                <Button onClick={() => setForm({ open: true, transaction: null })}>
+                  Add transaction
+                </Button>
+              }
+            />
+          )
         ) : (
           <div className={transactions.isPlaceholderData ? "opacity-60 transition-opacity" : ""}>
             <TransactionTable
@@ -143,38 +169,6 @@ export function TransactionsView() {
         onClose={() => setForm({ open: false })}
       />
       <DeleteTransactionDialog transaction={deleting} onClose={() => setDeleting(null)} />
-    </div>
-  );
-}
-
-function EmptyState({
-  filtered,
-  onAdd,
-  onClear,
-}: {
-  filtered: boolean;
-  onAdd: () => void;
-  onClear: () => void;
-}) {
-  return (
-    <div className="px-4 py-16 text-center">
-      <p className="font-medium text-slate-900">
-        {filtered ? "No transactions match your filters" : "No transactions yet"}
-      </p>
-      <p className="mt-1 text-sm text-slate-500">
-        {filtered
-          ? "Try changing or clearing the filters."
-          : "Add your first income or expense to get started."}
-      </p>
-      <div className="mt-4">
-        {filtered ? (
-          <Button variant="secondary" onClick={onClear}>
-            Clear filters
-          </Button>
-        ) : (
-          <Button onClick={onAdd}>Add transaction</Button>
-        )}
-      </div>
     </div>
   );
 }

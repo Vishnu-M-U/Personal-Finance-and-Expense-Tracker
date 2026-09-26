@@ -103,6 +103,11 @@ http://localhost:5000/api
 | PATCH | `/api/transactions/:id` | Yes | Update a transaction (partial) |
 | DELETE | `/api/transactions/:id` | Yes | Delete a transaction |
 | GET | `/api/dashboard/summary` | Yes | Dashboard data for a date range |
+| GET | `/api/investments` | Yes | List investments with portfolio summary |
+| GET | `/api/investments/:id` | Yes | Get one investment |
+| POST | `/api/investments` | Yes | Add an investment |
+| PATCH | `/api/investments/:id` | Yes | Update an investment (partial) |
+| DELETE | `/api/investments/:id` | Yes | Delete an investment |
 
 ---
 
@@ -479,7 +484,74 @@ sends both dates explicitly, calculated in the user's local timezone.
 
 ---
 
-## 10. CORS
+## 10. Investments
+
+All routes require auth and only touch the caller's own investments (another user's id → `404`).
+
+### Investment object
+
+```json
+{
+  "id": 1,
+  "name": "Nippon Small Cap",
+  "type": "MUTUAL_FUND",
+  "investedAmount": "50000.00",
+  "currentValue": "58000.00",
+  "returnAmount": "8000.00",
+  "returnPercentage": 16,
+  "createdAt": "2026-09-26T19:34:28.253Z",
+  "updatedAt": "2026-09-26T19:34:28.253Z"
+}
+```
+
+`type` is one of `MUTUAL_FUND`, `STOCKS`, `GOLD`, `FIXED_DEPOSIT`, `BONDS`, `REAL_ESTATE`,
+`CRYPTO`, `OTHER`. `returnAmount` = `currentValue − investedAmount` (negative for a loss);
+`returnPercentage` is that as a % of `investedAmount`, rounded to 2 decimals.
+
+### `GET /api/investments`
+
+All investments, newest first (no pagination), plus portfolio totals.
+
+```json
+{
+  "data": [ /* Investment objects */ ],
+  "summary": {
+    "totalInvested": "150000.00",
+    "currentValue": "172500.00",
+    "totalReturn": "22500.00",
+    "returnPercentage": 15,
+    "allocation": [
+      { "type": "MUTUAL_FUND", "currentValue": "127000.00", "percentage": 73.62 },
+      { "type": "GOLD", "currentValue": "45500.00", "percentage": 26.38 }
+    ]
+  }
+}
+```
+
+`allocation` is each type's share of `currentValue`, sorted largest first. With no investments,
+totals are `"0.00"`, `returnPercentage` is `0` and `allocation` is empty.
+
+### `POST /api/investments`
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `name` | string | Required, trimmed, 1–100 chars |
+| `type` | enum | Required, see above |
+| `investedAmount` | number or string | Required, > 0, max 2 decimals |
+| `currentValue` | number or string | Required, ≥ 0, max 2 decimals |
+
+**Response `201`:** `{ "data": Investment }`
+
+### `GET /api/investments/:id`, `PATCH /api/investments/:id`, `DELETE /api/investments/:id`
+
+`GET` returns `{ "data": Investment }`. `PATCH` accepts any subset of the `POST` fields (at least
+one) and returns the updated investment. `DELETE` returns `204`.
+
+**Errors:** `400 VALIDATION_ERROR`, `401 UNAUTHORIZED`, `404 NOT_FOUND`
+
+---
+
+## 11. CORS
 
 | Setting | Value |
 |---------|-------|

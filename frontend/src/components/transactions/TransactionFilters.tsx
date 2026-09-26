@@ -15,7 +15,7 @@ interface Props {
   onClear: () => void;
 }
 
-const labelClass = "mb-1 block text-xs font-medium text-slate-500";
+const labelClass = "mb-1.5 block text-xs font-medium text-slate-600";
 
 export function TransactionFiltersBar({ filters, categories, onChange, onClear }: Props) {
   const [search, setSearch] = useState(filters.search ?? "");
@@ -47,21 +47,37 @@ export function TransactionFiltersBar({ filters, categories, onChange, onClear }
     onChange({ type, categoryId });
   };
 
+  const active = hasActiveFilters(filters);
+
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-6 md:items-end">
-      <div className="col-span-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+      <div className="sm:col-span-2 lg:col-span-4">
         <label htmlFor="filter-search" className={labelClass}>
           Search
         </label>
-        <Input
-          id="filter-search"
-          type="search"
-          placeholder="Search descriptions"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="relative">
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          >
+            <path d="M9 15.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM17.5 17.5l-3.8-3.8" />
+          </svg>
+          <Input
+            id="filter-search"
+            type="search"
+            placeholder="Search descriptions"
+            className="pl-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
-      <div>
+      <div className="lg:col-span-2">
         <label htmlFor="filter-type" className={labelClass}>
           Type
         </label>
@@ -75,7 +91,7 @@ export function TransactionFiltersBar({ filters, categories, onChange, onClear }
           <option value="EXPENSE">Expense</option>
         </Select>
       </div>
-      <div>
+      <div className="lg:col-span-2">
         <label htmlFor="filter-category" className={labelClass}>
           Category
         </label>
@@ -94,37 +110,46 @@ export function TransactionFiltersBar({ filters, categories, onChange, onClear }
           ))}
         </Select>
       </div>
-      <div>
-        <label htmlFor="filter-start" className={labelClass}>
-          From
-        </label>
-        <Input
-          id="filter-start"
-          type="date"
-          value={filters.startDate ?? ""}
-          max={filters.endDate}
-          onChange={(e) => onChange({ startDate: e.target.value || undefined })}
-        />
-      </div>
-      <div>
-        <label htmlFor="filter-end" className={labelClass}>
-          To
-        </label>
-        <Input
-          id="filter-end"
-          type="date"
-          value={filters.endDate ?? ""}
-          min={filters.startDate}
-          onChange={(e) => onChange({ endDate: e.target.value || undefined })}
-        />
-      </div>
-      {hasActiveFilters(filters) && (
-        <div className="col-span-2 md:col-span-6">
-          <Button variant="ghost" className="-ml-2 px-2 py-1" onClick={onClear}>
-            Clear filters
-          </Button>
+      <div className="lg:col-span-3">
+        <span className={labelClass}>Date range</span>
+        <div className="flex items-center gap-2">
+          <label htmlFor="filter-start" className="sr-only">
+            From
+          </label>
+          <Input
+            id="filter-start"
+            type="date"
+            value={filters.startDate ?? ""}
+            max={filters.endDate}
+            onChange={(e) => onChange({ startDate: e.target.value || undefined })}
+          />
+          <span className="text-sm text-slate-400" aria-hidden="true">
+            –
+          </span>
+          <label htmlFor="filter-end" className="sr-only">
+            To
+          </label>
+          <Input
+            id="filter-end"
+            type="date"
+            value={filters.endDate ?? ""}
+            min={filters.startDate}
+            onChange={(e) => onChange({ endDate: e.target.value || undefined })}
+          />
         </div>
-      )}
+      </div>
+      <div className="flex sm:col-span-2 lg:col-span-1 lg:justify-end">
+        <Button
+          variant="ghost"
+          className="w-full lg:w-auto"
+          disabled={!active}
+          onClick={onClear}
+          aria-label="Clear filters"
+        >
+          <span className="lg:hidden">Clear filters</span>
+          <span className="hidden lg:inline">Clear</span>
+        </Button>
+      </div>
     </div>
   );
 }

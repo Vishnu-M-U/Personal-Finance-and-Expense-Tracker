@@ -2,7 +2,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" }) {
   const box = size === "sm" ? "size-8" : "size-10";
   return (
     <span
-      className={`flex ${box} items-center justify-center rounded-xl bg-indigo-600 text-white`}
+      className={`flex ${box} items-center justify-center rounded-lg bg-brand-600 text-white`}
       aria-hidden="true"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-5">

@@ -2,7 +2,10 @@ import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { TransactionFilters } from "@/lib/transactionFilters";
 import type { Transaction } from "@/types/api";
+import { RowActions } from "@/components/ui/RowActions";
 import { Amount } from "./Amount";
+import { CategoryIcon } from "./CategoryIcon";
+import { TypeBadge } from "./TypeBadge";
 
 type SortKey = TransactionFilters["sortBy"];
 
@@ -41,12 +44,12 @@ function SortHeader({
         type="button"
         onClick={() => onSort(column)}
         className={cn(
-          "inline-flex items-center gap-1 font-medium hover:text-slate-900",
+          "inline-flex items-center gap-1 rounded font-medium uppercase tracking-wide hover:text-slate-900",
           active && "text-slate-900",
         )}
       >
         {label}
-        <span aria-hidden="true" className={cn("text-xs", !active && "opacity-30")}>
+        <span aria-hidden="true" className={cn("text-[10px]", !active && "opacity-30")}>
           {active && sortOrder === "asc" ? "▲" : "▼"}
         </span>
       </button>
@@ -54,35 +57,30 @@ function SortHeader({
   );
 }
 
-function RowActions({
+/** Category icon on a light background tinted by type. */
+function CategoryChip({
   transaction,
-  onEdit,
-  onDelete,
+  size = "md",
 }: {
   transaction: Transaction;
-  onEdit: Props["onEdit"];
-  onDelete: Props["onDelete"];
+  size?: "sm" | "md";
 }) {
-  const label = transaction.description ?? transaction.category.name;
   return (
-    <div className="flex justify-end gap-1">
-      <button
-        type="button"
-        onClick={() => onEdit(transaction)}
-        className="rounded-md px-2 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
-        aria-label={`Edit ${label}`}
-      >
-        Edit
-      </button>
-      <button
-        type="button"
-        onClick={() => onDelete(transaction)}
-        className="rounded-md px-2 py-1 text-sm font-medium text-rose-600 hover:bg-rose-50"
-        aria-label={`Delete ${label}`}
-      >
-        Delete
-      </button>
-    </div>
+    <span
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full",
+        size === "sm" ? "size-9" : "size-10",
+        transaction.type === "INCOME"
+          ? "bg-income-100 text-income-600"
+          : "bg-expense-100 text-expense-600",
+      )}
+      aria-hidden="true"
+    >
+      <CategoryIcon
+        name={transaction.category.name}
+        className={size === "sm" ? "size-4" : "size-5"}
+      />
+    </span>
   );
 }
 
@@ -98,15 +96,12 @@ export function TransactionTable({
     <>
       {/* Desktop */}
       <table className="hidden w-full text-sm md:table">
-        <thead className="border-b border-slate-200 text-left text-slate-500">
+        <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
           <tr>
+            <th scope="col" className="py-3 pl-5 pr-4 font-medium">
+              Transaction
+            </th>
             <SortHeader label="Date" column="date" {...{ sortBy, sortOrder, onSort }} />
-            <th scope="col" className="px-4 py-3 font-medium">
-              Description
-            </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Category
-            </th>
             <th scope="col" className="px-4 py-3 font-medium">
               Type
             </th>
@@ -116,61 +111,92 @@ export function TransactionTable({
               align="right"
               {...{ sortBy, sortOrder, onSort }}
             />
-            <th scope="col" className="px-4 py-3">
+            <th scope="col" className="py-3 pl-4 pr-5">
               <span className="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {transactions.map((t) => (
-            <tr key={t.id} className="hover:bg-slate-50">
-              <td className="whitespace-nowrap px-4 py-3 text-slate-600">{formatDate(t.date)}</td>
-              <td className="max-w-xs truncate px-4 py-3 text-slate-900">
-                {t.description ?? <span className="text-slate-400">—</span>}
+            <tr key={t.id} className="transition-colors hover:bg-slate-50">
+              <td className="py-3 pl-5 pr-4">
+                <div className="flex items-center gap-3">
+                  <CategoryChip transaction={t} />
+                  <div className="min-w-0">
+                    <p className="max-w-xs truncate font-medium text-slate-900">
+                      {t.description ?? t.category.name}
+                    </p>
+                    <p className="text-xs text-slate-500">{t.category.name}</p>
+                  </div>
+                </div>
               </td>
-              <td className="px-4 py-3 text-slate-600">{t.category.name}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-slate-600">{formatDate(t.date)}</td>
               <td className="px-4 py-3">
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-xs font-medium",
-                    t.type === "INCOME"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-rose-50 text-rose-700",
-                  )}
-                >
-                  {t.type === "INCOME" ? "Income" : "Expense"}
-                </span>
+                <TypeBadge type={t.type} />
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-right">
-                <Amount amount={t.amount} type={t.type} />
+                <Amount amount={t.amount} type={t.type} className="font-semibold" />
               </td>
-              <td className="px-4 py-2">
-                <RowActions transaction={t} onEdit={onEdit} onDelete={onDelete} />
+              <td className="py-3 pl-4 pr-5">
+                <RowActions
+                  label={t.description ?? t.category.name}
+                  onEdit={() => onEdit(t)}
+                  onDelete={() => onDelete(t)}
+                />
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Mobile */}
+      {/* Mobile: one card-like row per transaction */}
       <ul className="divide-y divide-slate-100 md:hidden">
         {transactions.map((t) => (
-          <li key={t.id} className="flex items-start justify-between gap-3 px-4 py-3">
-            <div className="min-w-0">
-              <p className="truncate font-medium text-slate-900">
-                {t.description ?? t.category.name}
+          <li key={t.id} className="flex gap-3 px-4 py-4">
+            <CategoryChip transaction={t} size="sm" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <p className="truncate font-medium text-slate-900">
+                  {t.description ?? t.category.name}
+                </p>
+                <Amount amount={t.amount} type={t.type} className="shrink-0 font-semibold" />
+              </div>
+              <p className="mt-0.5 truncate text-xs text-slate-500">
+                {t.category.name} · {formatDate(t.date)}
               </p>
-              <p className="text-sm text-slate-500">
-                {formatDate(t.date)} · {t.category.name}
-              </p>
-            </div>
-            <div className="shrink-0 text-right">
-              <Amount amount={t.amount} type={t.type} />
-              <RowActions transaction={t} onEdit={onEdit} onDelete={onDelete} />
+              <div className="mt-2 flex items-center justify-between">
+                <TypeBadge type={t.type} />
+                <RowActions
+                  label={t.description ?? t.category.name}
+                  onEdit={() => onEdit(t)}
+                  onDelete={() => onDelete(t)}
+                />
+              </div>
             </div>
           </li>
         ))}
       </ul>
     </>
+  );
+}
+
+/** Placeholder rows while the first page loads. */
+export function TransactionTableSkeleton({ rows = 6 }: { rows?: number }) {
+  return (
+    <div aria-busy="true" aria-label="Loading transactions">
+      <div className="hidden h-11 border-b border-slate-200 bg-slate-50 md:block" />
+      <ul className="divide-y divide-slate-100">
+        {Array.from({ length: rows }, (_, i) => (
+          <li key={i} className="flex items-center gap-3 px-4 py-4 md:px-5">
+            <div className="size-10 shrink-0 animate-pulse rounded-full bg-slate-100" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3.5 w-1/3 animate-pulse rounded bg-slate-100" />
+              <div className="h-3 w-1/5 animate-pulse rounded bg-slate-100" />
+            </div>
+            <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

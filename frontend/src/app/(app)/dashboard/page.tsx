@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CategoryBreakdown } from "@/components/dashboard/CategoryBreakdown";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { PeriodSelector } from "@/components/dashboard/PeriodSelector";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
@@ -14,6 +16,9 @@ import { useDashboardSummary } from "@/hooks/useDashboard";
 import { getErrorMessage } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { presetRange, type DateRange, type PeriodPreset } from "@/lib/periods";
+import { queryKeys } from "@/lib/queryKeys";
+import { DEFAULT_SORT, filtersToQueryString } from "@/lib/transactionFilters";
+import type { TransactionType, User } from "@/types/api";
 
 export default function DashboardPage() {
   const [preset, setPreset] = useState<PeriodPreset>("thisMonth");
@@ -25,6 +30,9 @@ export default function DashboardPage() {
 
   const summary = useDashboardSummary(range, rangeValid);
   const categories = useCategories();
+  // The app layout has already loaded the user; read it from the cache rather than refetching.
+  const user = useQueryClient().getQueryData<User | null>(queryKeys.me);
+  const firstName = user?.name.trim().split(/\s+/)[0];
 
   const changePreset = (next: PeriodPreset) => {
     // Start a custom range from whatever period was showing.
@@ -33,26 +41,29 @@ export default function DashboardPage() {
   };
 
   const data = summary.data;
+  // "View all" on a breakdown opens Transactions filtered to that type and this period.
+  const viewAllHref = (type: TransactionType) =>
+    `/transactions?${filtersToQueryString({ ...DEFAULT_SORT, page: 1, type, startDate: range.startDate, endDate: range.endDate })}`;
   const isEmpty = data && data.totals.income === "0.00" && data.totals.expense === "0.00";
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {rangeValid
-              ? `${formatDate(range.startDate)} – ${formatDate(range.endDate)}`
-              : "Choose a valid date range"}
-          </p>
-        </div>
+      <DashboardHero
+        firstName={firstName}
+        rangeLabel={
+          rangeValid
+            ? `${formatDate(range.startDate)} – ${formatDate(range.endDate)}`
+            : "Choose a valid date range"
+        }
+        onAdd={() => setAdding(true)}
+      >
         <PeriodSelector
           preset={preset}
           customRange={customRange}
           onPresetChange={changePreset}
           onCustomRangeChange={setCustomRange}
         />
-      </div>
+      </DashboardHero>
 
       {summary.isError ? (
         <Alert
@@ -85,20 +96,28 @@ export default function DashboardPage() {
               </Button>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="space-y-6 lg:col-span-3">
                 <CategoryBreakdown
                   title="Expenses by category"
+                  tone="expense"
+                  total={data.totals.expense}
                   rows={data.expenseByCategory}
                   emptyText="No expenses in this period."
+                  viewAllHref={viewAllHref("EXPENSE")}
                 />
                 <CategoryBreakdown
                   title="Income by category"
+                  tone="income"
+                  total={data.totals.income}
                   rows={data.incomeByCategory}
                   emptyText="No income in this period."
+                  viewAllHref={viewAllHref("INCOME")}
                 />
               </div>
-              <RecentTransactions transactions={data.recentTransactions} />
+              <div className="lg:col-span-2">
+                <RecentTransactions transactions={data.recentTransactions} />
+              </div>
             </div>
           )}
         </div>
@@ -117,14 +136,17 @@ export default function DashboardPage() {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6" aria-busy="true" aria-label="Loading dashboard">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <Card key={i} className="h-28 animate-pulse bg-slate-100" />
+          <Card
+            key={i}
+            className="h-36 animate-pulse bg-slate-100 first:sm:col-span-2 first:lg:col-span-1"
+          />
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="h-72 animate-pulse bg-slate-100" />
-        <Card className="h-72 animate-pulse bg-slate-100" />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <Card className="h-80 animate-pulse bg-slate-100 lg:col-span-3" />
+        <Card className="h-80 animate-pulse bg-slate-100 lg:col-span-2" />
       </div>
     </div>
   );

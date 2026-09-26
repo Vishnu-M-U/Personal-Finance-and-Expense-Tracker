@@ -2,14 +2,16 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 import { Spinner } from "./Spinner";
 
-type Variant = "primary" | "secondary" | "danger" | "ghost";
+type Variant = "primary" | "secondary" | "danger" | "ghost" | "inverse";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:outline-indigo-600",
+  primary: "bg-brand-600 text-white shadow-sm hover:bg-brand-700 focus-visible:outline-brand-600",
   secondary:
-    "bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus-visible:outline-slate-400",
-  danger: "bg-rose-600 text-white hover:bg-rose-700 focus-visible:outline-rose-600",
+    "bg-white text-slate-700 ring-1 ring-inset ring-slate-200 hover:bg-slate-100 focus-visible:outline-slate-400",
+  danger: "bg-expense-600 text-white hover:bg-expense-700 focus-visible:outline-expense-600",
   ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-slate-400",
+  /** White button for colored surfaces such as the dashboard hero. */
+  inverse: "bg-white text-brand-700 shadow-sm hover:bg-brand-50 focus-visible:outline-white",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
