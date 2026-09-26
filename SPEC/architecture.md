@@ -95,6 +95,8 @@ backend/
 │   │   ├── AppError.ts          # typed error with status + code
 │   │   ├── jwt.ts               # sign / verify helpers
 │   │   ├── authCookie.ts        # set / clear the access_token cookie
+│   │   ├── schemas.ts           # shared Zod pieces: amount, date, id param, type
+│   │   ├── dates.ts             # YYYY-MM-DD ⇄ UTC-midnight Date
 │   │   └── serializers.ts       # Decimal → string, Date → YYYY-MM-DD
 │   └── types/
 │       └── express.d.ts         # adds userId to Request

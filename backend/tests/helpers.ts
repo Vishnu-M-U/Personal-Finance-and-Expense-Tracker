@@ -25,3 +25,9 @@ export async function registerUser(app: App, overrides: { email?: string } = {})
   const res = await agent.post("/api/auth/register").send(credentials).expect(201);
   return { agent, user: res.body.data.user as { id: number; email: string }, credentials };
 }
+
+/** Looks up a seeded category id by name. */
+export async function categoryId(name: string) {
+  const category = await prisma.category.findFirstOrThrow({ where: { name } });
+  return category.id;
+}
