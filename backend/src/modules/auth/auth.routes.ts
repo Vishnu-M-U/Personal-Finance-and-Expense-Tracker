@@ -1,10 +1,17 @@
 import { Router } from "express";
+import { authRateLimiter } from "../../middleware/rateLimit.js";
 import { requireAuth } from "../../middleware/requireAuth.js";
 import * as authController from "./auth.controller.js";
 
-export const authRouter = Router();
+/** Only login and register are rate-limited; /me runs on every page load. */
+export function createAuthRouter(rateLimit: number) {
+  const router = Router();
+  const limiter = authRateLimiter(rateLimit);
 
-authRouter.post("/register", authController.register);
-authRouter.post("/login", authController.login);
-authRouter.post("/logout", authController.logout);
-authRouter.get("/me", requireAuth, authController.me);
+  router.post("/register", limiter, authController.register);
+  router.post("/login", limiter, authController.login);
+  router.post("/logout", authController.logout);
+  router.get("/me", requireAuth, authController.me);
+
+  return router;
+}

@@ -79,7 +79,7 @@ backend/
 │   │   └── prisma.ts            # single PrismaClient instance (MariaDB adapter)
 │   ├── middleware/
 │   │   ├── requireAuth.ts       # verifies JWT cookie, sets req.userId
-│   │   ├── rateLimit.ts         # rate limiter for /api/auth
+│   │   ├── rateLimit.ts         # rate limiter for login + register
 │   │   ├── errorHandler.ts      # converts AppError / ZodError / others to the API error format
 │   │   └── notFound.ts          # 404 for unknown routes
 │   ├── modules/
@@ -129,7 +129,7 @@ backend/
 ```text
 Request
   → helmet, cors, express.json, cookie-parser    (global middleware)
-  → rate limiter                                  (auth routes only)
+  → rate limiter                                  (login + register only)
   → router
   → requireAuth                                   (protected routes)
   → controller: schema.parse(...)                 (ZodError → 400)
@@ -163,6 +163,7 @@ frontend/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx                 # root layout, <Providers>
+│   │   ├── providers.tsx              # QueryClientProvider
 │   │   ├── page.tsx                   # redirect to /dashboard or /login
 │   │   ├── (auth)/                    # guest-only pages
 │   │   │   ├── layout.tsx             # redirects logged-in users away
@@ -174,7 +175,7 @@ frontend/
 │   │       └── transactions/page.tsx
 │   ├── components/
 │   │   ├── ui/                        # Button, Input, Select, Modal, Card, Spinner…
-│   │   ├── layout/                    # Navbar, UserMenu
+│   │   ├── layout/                    # Navbar, Logo
 │   │   ├── dashboard/                 # PeriodSelector, SummaryCards,
 │   │   │                              # CategoryChart, RecentTransactions
 │   │   └── transactions/              # TransactionTable, TransactionFilters,
@@ -188,14 +189,14 @@ frontend/
 │   │   ├── api.ts                     # Axios instance
 │   │   ├── queryClient.ts
 │   │   ├── queryKeys.ts
+│   │   ├── transactionFilters.ts      # filter type shared by URL state + query keys
+│   │   ├── cn.ts                      # className helper
 │   │   └── format.ts                  # currency + date formatting
 │   ├── schemas/                       # Zod schemas for forms
-│   ├── types/                         # API response types
-│   └── providers.tsx                  # QueryClientProvider
+│   └── types/                         # API response types
 ├── .env.example
 ├── package.json
-├── tailwind.config.ts
-└── tsconfig.json
+└── tsconfig.json                      # Tailwind 4 is configured in globals.css
 ```
 
 ### 4.2 Data Fetching
@@ -203,8 +204,9 @@ frontend/
 - All API calls go through one Axios instance in `lib/api.ts`:
   - `baseURL = process.env.NEXT_PUBLIC_API_URL`
   - `withCredentials: true` so the auth cookie is sent
-  - A response interceptor: on `401`, clear the React Query cache and
-    redirect to `/login`
+  - A response interceptor: on `401` from a non-auth endpoint (session
+    expired), set `['me']` to `null` and drop other cached queries; the
+    `(app)` layout then redirects to `/login`
 - Pages that need data are **client components** using React Query hooks.
   (Server-side fetching is not used in the MVP because the auth cookie
   belongs to the API origin.)
@@ -220,13 +222,16 @@ frontend/
 
 After creating, updating, or deleting a transaction, invalidate
 `['transactions']` and `['dashboard']`.
-After login/register, set `['me']`. After logout, clear the entire cache.
+After login/register/logout, remove every cached query except `['me']` and
+set `['me']` to the new user (or `null`). `['me']` is updated in place rather
+than removed so the layouts watching it re-render.
 
 ### 4.4 Route Protection
 
 - `(app)/layout.tsx` calls `useMe()`.
   - Loading → full-page spinner
-  - `401` → redirect to `/login`
+  - `null` (the `/auth/me` 401 is mapped to `null`) → redirect to `/login`
+  - Network/server error → error message with a Retry button
   - Success → render navbar + page
 - `(auth)/layout.tsx` does the opposite: if `useMe()` succeeds, redirect to
   `/dashboard`.
@@ -289,7 +294,7 @@ cookie but does not invalidate the token itself before it expires.
 | Password storage | bcrypt, cost 12; passwords never logged or returned |
 | XSS token theft | httpOnly cookie; React escapes output by default |
 | CSRF | `SameSite=Lax` cookie + CORS limited to `CORS_ORIGIN` + API only accepts `application/json` bodies |
-| Brute-force login | `express-rate-limit` on `/api/auth/*` (20 requests / 15 min / IP) |
+| Brute-force login | `express-rate-limit` on `POST /api/auth/login` and `/register` (20 requests / 15 min / IP) |
 | Data leakage between users | Every transaction query filters by `userId`; other users' records return `404` |
 | Injection | Prisma parameterized queries; Zod validates all input |
 | HTTP headers | `helmet` |

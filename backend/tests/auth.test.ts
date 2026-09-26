@@ -153,3 +153,17 @@ describe("auth rate limiting", () => {
     expect(blocked.body.error.code).toBe("RATE_LIMITED");
   });
 });
+
+describe("auth rate limiting scope", () => {
+  it("does not count GET /api/auth/me against the limit", async () => {
+    const limitedApp = createApp({ authRateLimit: 2 });
+    const agent = request.agent(limitedApp);
+    await agent
+      .post("/api/auth/register")
+      .send({ name: "Rate", email: `rate-${Date.now()}@example.com`, password: "password123" })
+      .expect(201);
+    for (let i = 0; i < 5; i++) {
+      expect((await agent.get("/api/auth/me")).status).toBe(200);
+    }
+  });
+});

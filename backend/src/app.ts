@@ -5,14 +5,13 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
-import { authRateLimiter } from "./middleware/rateLimit.js";
-import { authRouter } from "./modules/auth/auth.routes.js";
+import { createAuthRouter } from "./modules/auth/auth.routes.js";
 import { categoriesRouter } from "./modules/categories/categories.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 import { transactionsRouter } from "./modules/transactions/transactions.routes.js";
 
 interface AppOptions {
-  /** Max auth requests per IP per 15 minutes. */
+  /** Max login/register requests per IP per 15 minutes. */
   authRateLimit?: number;
 }
 
@@ -35,7 +34,7 @@ export function createApp({ authRateLimit = 20 }: AppOptions = {}) {
     res.json({ data: { status: "ok" } });
   });
 
-  app.use("/api/auth", authRateLimiter(authRateLimit), authRouter);
+  app.use("/api/auth", createAuthRouter(authRateLimit));
   app.use("/api/categories", categoriesRouter);
   app.use("/api/transactions", transactionsRouter);
   app.use("/api/dashboard", dashboardRouter);

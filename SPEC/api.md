@@ -82,7 +82,7 @@ http://localhost:5000/api
 | 401 | `INVALID_CREDENTIALS` | Wrong email or password on login |
 | 404 | `NOT_FOUND` | Resource does not exist **or belongs to another user** |
 | 409 | `EMAIL_TAKEN` | Register with an email already in use |
-| 429 | `RATE_LIMITED` | Too many auth requests |
+| 429 | `RATE_LIMITED` | Too many login or register requests |
 | 500 | `INTERNAL_ERROR` | Unexpected server error |
 
 ---
@@ -168,7 +168,7 @@ http://localhost:5000/api
 
 ## 6. Auth
 
-Auth routes are rate-limited to 20 requests per 15 minutes per IP.
+`POST /register` and `POST /login` are rate-limited to 20 requests per 15 minutes per IP (together). `/me` and `/logout` are not limited, because `/me` runs on every page load.
 
 ### `POST /api/auth/register`
 
