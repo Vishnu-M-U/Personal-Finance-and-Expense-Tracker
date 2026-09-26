@@ -72,7 +72,7 @@ The following are explicitly **not** part of the MVP and may be considered later
 | DASH-1 | The dashboard shows data for a selected period. Default period: **current calendar month**. |
 | DASH-2 | The user can change the period using presets (This month, Last month, Last 3 months, This year) or a custom date range. |
 | DASH-3 | Summary cards show **Total Income**, **Total Expenses**, and **Net Balance** (income − expenses) for the period. |
-| DASH-4 | A donut/pie chart shows **expenses by category** for the period, with amount and percentage per category. |
+| DASH-4 | A horizontal bar list shows **expenses by category** (and income by category) for the period, largest first, with amount and percentage per category. A bar list is used instead of a donut: with up to 12 categories, slices become too many colours to tell apart (especially with colour-vision deficiency), while bars in one hue sorted by size compare easily and every value is labelled. |
 | DASH-5 | A list shows the **5 most recent transactions** in the period, with a link to the full transactions page. |
 | DASH-6 | When there is no data for the period, an empty state is shown with a call-to-action to add a transaction. |
 
@@ -159,7 +159,6 @@ The following are explicitly **not** part of the MVP and may be considered later
 - TanStack React Query
 - Axios
 - *Proposed:* React Hook Form + Zod (forms and validation)
-- *Proposed:* Recharts (dashboard chart)
 
 ### Backend
 
@@ -226,7 +225,7 @@ variables (see [architecture.md](architecture.md) §7).
 | `/` | Public | Redirects to `/dashboard` if logged in, otherwise `/login` |
 | `/login` | Guest only | Login form |
 | `/register` | Guest only | Registration form |
-| `/dashboard` | Authenticated | Summary cards, category chart, recent transactions |
+| `/dashboard` | Authenticated | Period selector, summary cards, category bars, recent transactions, add transaction |
 | `/transactions` | Authenticated | Filterable, sortable, paginated table; create/edit in a modal; delete with confirmation |
 
 ---
@@ -242,7 +241,7 @@ variables (see [architecture.md](architecture.md) §7).
 | 4 | Backend dashboard summary endpoint + tests |
 | 5 | Frontend foundation: providers, Axios client, auth pages, route protection, app layout |
 | 6 | Frontend transactions page: table, filters, create/edit modal, delete |
-| 7 | Frontend dashboard: period selector, summary cards, chart, recent list |
+| 7 | Frontend dashboard: period selector, summary cards, category bars, recent list |
 | 8 | Polish: empty/error states, responsive pass, README completed |
 
 ---
@@ -261,5 +260,5 @@ Defaults chosen while drafting this spec. Each can be changed before coding star
 | D6 | Currency | Single, display-only, default `INR` | Other default / per-user setting |
 | D7 | Docker scope | Only MySQL in Docker; apps run with `npm run dev` | Dockerize frontend and backend too |
 | D8 | IDs | Auto-increment integers | UUID / CUID strings |
-| D9 | Dashboard chart | Expenses by category (donut) | Also monthly income vs expense trend |
+| D9 | Dashboard chart | Expenses and income by category (horizontal bars, plain HTML — no chart library) | Also monthly income vs expense trend |
 | D10 | Frontend tests | Optional for MVP | Required (Vitest + Testing Library) |

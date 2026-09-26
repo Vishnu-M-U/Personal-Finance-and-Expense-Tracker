@@ -76,5 +76,5 @@ Built in phases (see [SPEC/spec.md §8](SPEC/spec.md)).
 - [x] Phase 4 — Dashboard API
 - [x] Phase 5 — Frontend foundation and auth pages
 - [x] Phase 6 — Transactions page
-- [ ] Phase 7 — Dashboard page
+- [x] Phase 7 — Dashboard page
 - [ ] Phase 8 — Polish

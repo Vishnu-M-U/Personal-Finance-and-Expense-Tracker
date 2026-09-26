@@ -177,7 +177,7 @@ frontend/
 │   │   ├── ui/                        # Button, Input, Select, Modal, Card, Spinner…
 │   │   ├── layout/                    # Navbar, Logo
 │   │   ├── dashboard/                 # PeriodSelector, SummaryCards,
-│   │   │                              # CategoryChart, RecentTransactions
+│   │   │                              # CategoryBreakdown, RecentTransactions
 │   │   └── transactions/              # TransactionTable, TransactionFilters,
 │   │                                  # TransactionFormModal, DeleteDialog, Pagination
 │   ├── hooks/
@@ -190,6 +190,7 @@ frontend/
 │   │   ├── queryClient.ts
 │   │   ├── queryKeys.ts
 │   │   ├── transactionFilters.ts      # filter type shared by URL state + query keys
+│   │   ├── periods.ts                 # dashboard period presets → date ranges
 │   │   ├── cn.ts                      # className helper
 │   │   └── format.ts                  # currency + date formatting
 │   ├── schemas/                       # Zod schemas for forms

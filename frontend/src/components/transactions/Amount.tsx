@@ -17,7 +17,7 @@ export function Amount({
     <span
       className={cn(
         "font-medium tabular-nums",
-        income ? "text-emerald-600" : "text-rose-600",
+        income ? "text-emerald-700" : "text-rose-600",
         className,
       )}
     >
