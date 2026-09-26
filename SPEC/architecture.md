@@ -79,8 +79,8 @@ backend/
 │   │   └── prisma.ts            # single PrismaClient instance (MariaDB adapter)
 │   ├── middleware/
 │   │   ├── requireAuth.ts       # verifies JWT cookie, sets req.userId
-│   │   ├── validate.ts          # validates body/query/params with a Zod schema
-│   │   ├── errorHandler.ts      # converts errors to the API error format
+│   │   ├── rateLimit.ts         # rate limiter for /api/auth
+│   │   ├── errorHandler.ts      # converts AppError / ZodError / others to the API error format
 │   │   └── notFound.ts          # 404 for unknown routes
 │   ├── modules/
 │   │   ├── auth/
@@ -94,6 +94,7 @@ backend/
 │   ├── utils/
 │   │   ├── AppError.ts          # typed error with status + code
 │   │   ├── jwt.ts               # sign / verify helpers
+│   │   ├── authCookie.ts        # set / clear the access_token cookie
 │   │   └── serializers.ts       # Decimal → string, Date → YYYY-MM-DD
 │   └── types/
 │       └── express.d.ts         # adds userId to Request
@@ -117,7 +118,7 @@ backend/
 |-------|----------------|----------|
 | **Routes** | Map HTTP method + path to middleware and controller | Contain logic |
 | **Middleware** | Cross-cutting concerns: auth, validation, errors, security headers | Access feature data directly |
-| **Controllers** | Read validated input from `req`, call a service, send the response | Call Prisma directly |
+| **Controllers** | Validate input with `schema.parse(req.body / req.query / req.params)`, call a service, send the response | Call Prisma directly |
 | **Services** | Business logic and all database access via Prisma | Know about `req` / `res` |
 | **Schemas** | Zod schemas for request body, query, params | — |
 
@@ -129,8 +130,8 @@ Request
   → rate limiter                                  (auth routes only)
   → router
   → requireAuth                                   (protected routes)
-  → validate(schema)                              (400 on invalid input)
-  → controller → service → Prisma → MySQL
+  → controller: schema.parse(...)                 (ZodError → 400)
+  → service → Prisma → MySQL
   → response JSON
   ↳ any thrown error → errorHandler → { error: { code, message, details? } }
 ```
@@ -139,7 +140,10 @@ Request
 
 - Services throw `AppError(status, code, message)` for expected failures
   (e.g. `404 NOT_FOUND`, `409 EMAIL_TAKEN`).
-- Zod validation failures become `400 VALIDATION_ERROR` with a `details` array.
+- Zod validation failures (`ZodError` thrown by `schema.parse` in controllers)
+  become `400 VALIDATION_ERROR` with a `details` array. Parsing in the
+  controller (instead of a `validate` middleware) keeps the parsed, typed
+  values in a local variable — Express 5 makes `req.query` read-only.
 - Unknown errors become `500 INTERNAL_ERROR`; the stack trace is logged but
   never sent to the client.
 - Express 5 forwards rejected promises from async handlers to the error

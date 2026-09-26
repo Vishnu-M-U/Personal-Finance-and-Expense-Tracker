@@ -5,8 +5,15 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
+import { authRateLimiter } from "./middleware/rateLimit.js";
+import { authRouter } from "./modules/auth/auth.routes.js";
 
-export function createApp() {
+interface AppOptions {
+  /** Max auth requests per IP per 15 minutes. */
+  authRateLimit?: number;
+}
+
+export function createApp({ authRateLimit = 20 }: AppOptions = {}) {
   const app = express();
 
   app.use(helmet());
@@ -24,6 +31,8 @@ export function createApp() {
   app.get("/api/health", (_req, res) => {
     res.json({ data: { status: "ok" } });
   });
+
+  app.use("/api/auth", authRateLimiter(authRateLimit), authRouter);
 
   app.use(notFound);
   app.use(errorHandler);

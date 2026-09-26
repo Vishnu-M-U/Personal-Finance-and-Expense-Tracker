@@ -71,7 +71,7 @@ Built in phases (see [SPEC/spec.md §8](SPEC/spec.md)).
 
 - [x] Phase 0 — Repo setup
 - [x] Phase 1 — Database schema and seed
-- [ ] Phase 2 — Backend auth
+- [x] Phase 2 — Backend auth
 - [ ] Phase 3 — Categories and transactions API
 - [ ] Phase 4 — Dashboard API
 - [ ] Phase 5 — Frontend foundation and auth pages
