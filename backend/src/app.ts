@@ -8,6 +8,7 @@ import { notFound } from "./middleware/notFound.js";
 import { authRateLimiter } from "./middleware/rateLimit.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { categoriesRouter } from "./modules/categories/categories.routes.js";
+import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 import { transactionsRouter } from "./modules/transactions/transactions.routes.js";
 
 interface AppOptions {
@@ -37,6 +38,7 @@ export function createApp({ authRateLimit = 20 }: AppOptions = {}) {
   app.use("/api/auth", authRateLimiter(authRateLimit), authRouter);
   app.use("/api/categories", categoriesRouter);
   app.use("/api/transactions", transactionsRouter);
+  app.use("/api/dashboard", dashboardRouter);
 
   app.use(notFound);
   app.use(errorHandler);
