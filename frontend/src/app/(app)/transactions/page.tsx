@@ -1,3 +1,12 @@
+import { Suspense } from "react";
+import { FullPageSpinner } from "@/components/ui/Spinner";
+import { TransactionsView } from "./TransactionsView";
+
 export default function TransactionsPage() {
-  return <h1 className="text-2xl font-semibold text-slate-900">Transactions</h1>;
+  // useSearchParams (for URL filters) requires a Suspense boundary.
+  return (
+    <Suspense fallback={<FullPageSpinner />}>
+      <TransactionsView />
+    </Suspense>
+  );
 }
