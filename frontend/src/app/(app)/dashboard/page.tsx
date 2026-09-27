@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CategoryBreakdown } from "@/components/dashboard/CategoryBreakdown";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { ExpenseBreakdown } from "@/components/dashboard/ExpenseBreakdown";
+import { IncomeBreakdown } from "@/components/dashboard/IncomeBreakdown";
 import { PeriodSelector } from "@/components/dashboard/PeriodSelector";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
@@ -98,20 +99,14 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
               <div className="space-y-6 lg:col-span-3">
-                <CategoryBreakdown
-                  title="Expenses by category"
-                  tone="expense"
+                <ExpenseBreakdown
                   total={data.totals.expense}
                   rows={data.expenseByCategory}
-                  emptyText="No expenses in this period."
                   viewAllHref={viewAllHref("EXPENSE")}
                 />
-                <CategoryBreakdown
-                  title="Income by category"
-                  tone="income"
+                <IncomeBreakdown
                   total={data.totals.income}
                   rows={data.incomeByCategory}
-                  emptyText="No income in this period."
                   viewAllHref={viewAllHref("INCOME")}
                 />
               </div>

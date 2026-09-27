@@ -28,25 +28,27 @@ export function RecentTransactions({ transactions }: { transactions: Transaction
           {transactions.map((t) => (
             <li
               key={t.id}
-              className="flex items-start gap-3 rounded-lg px-2 py-3 hover:bg-slate-100"
+              className="flex items-center gap-3 rounded-lg px-2 py-3 hover:bg-slate-50"
             >
+              {/* The amount carries income vs expense; expense chips stay neutral to limit red. */}
               <span
                 className={cn(
-                  "flex size-10 shrink-0 items-center justify-center rounded-full",
+                  "flex size-9 shrink-0 items-center justify-center rounded-full",
                   t.type === "INCOME"
-                    ? "bg-income-100 text-income-600"
-                    : "bg-expense-100 text-expense-600",
+                    ? "bg-income-50 text-income-600"
+                    : "bg-slate-100 text-slate-600",
                 )}
                 aria-hidden="true"
               >
-                <CategoryIcon name={t.category.name} />
+                <CategoryIcon name={t.category.name} className="size-[18px]" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-slate-900">
                   {t.description ?? t.category.name}
                 </p>
-                <p className="mt-0.5 truncate text-xs text-slate-600">{t.category.name}</p>
-                <p className="mt-0.5 text-xs text-slate-500">{formatDate(t.date)}</p>
+                <p className="mt-0.5 truncate text-xs text-slate-500">
+                  {t.category.name} · {formatDate(t.date)}
+                </p>
               </div>
               <Amount amount={t.amount} type={t.type} className="shrink-0 text-sm font-semibold" />
             </li>

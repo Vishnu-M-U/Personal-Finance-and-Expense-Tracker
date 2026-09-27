@@ -178,7 +178,7 @@ frontend/
 │   │   ├── ui/                        # Button, Input, Select, Modal, Card, Spinner…
 │   │   ├── layout/                    # Navbar, Logo
 │   │   ├── dashboard/                 # PeriodSelector, SummaryCards,
-│   │   │                              # CategoryBreakdown, RecentTransactions
+│   │   │                              # ExpenseBreakdown, IncomeBreakdown, RecentTransactions
 │   │   └── transactions/              # TransactionTable, TransactionFilters,
 │   │                                  # TransactionFormModal, DeleteDialog, Pagination
 │   ├── hooks/
